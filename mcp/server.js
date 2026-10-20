@@ -6,6 +6,7 @@ import { z } from "zod";
 import fs from "fs";
 import path from "path";
 import { installWorkOSAuth } from "./oauth-auth.js";
+import { readOnlyEnabled, makeReadOnlyServer } from "./readonly-test.js";
 
 const PORT = Number(process.env.PORT || 8787);
 const RAW_LINJIAN_URL = (process.env.LINJIAN_URL || "").trim();
@@ -1018,6 +1019,7 @@ function registerWalletTakeoutTools(server, { includeUnified = false } = {}) {
 }
 
 function makeWalletTakeoutServer() {
+  if (readOnlyEnabled) return makeReadOnlyServer({ McpServer, z, fetchBackend: linjianFetch, defaultDevice: DEFAULT_DEVICE });
   const server = new McpServer({ name: "掌心窗小金库外卖", version: "0.3.9.0" });
   server.tool("linjian_status", "检查掌心窗后端、MCP 配置，以及当前是否使用小金库/外卖专用 schema。", {}, async () => {
     const configErrors = [];
@@ -1031,6 +1033,7 @@ function makeWalletTakeoutServer() {
 }
 
 function makeServer() {
+  if (readOnlyEnabled) return makeReadOnlyServer({ McpServer, z, fetchBackend: linjianFetch, defaultDevice: DEFAULT_DEVICE });
   const server = new McpServer({ name: "掌心窗", version: "0.3.9.0" });
   const commandBackedTools = new Set([
     "peek_screen", "get_screen_nodes", "tap_text", "input_text", "draft_xhs_comment", "xhs_comment", "send_visible_comment_after_confirmation",
